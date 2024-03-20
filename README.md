@@ -38,6 +38,16 @@ BertSum은 BERT 위에 inter-sentence Transformer 2-layers 를 얹은 구조를 
 
   ![BERTSUM_structure](tutorials/images/BERTSUM_structure.PNG)
 
+## Envirnment Setting
+
+연구에 활동된 환경에 대해 소개한다.
+
+    ```
+    GPU : GeForce RTX 3080
+    python : 3.8.18
+    CuDA : 11.6
+    ```
+
 ## Install
 
 1. 필요 라이브러리 설치
