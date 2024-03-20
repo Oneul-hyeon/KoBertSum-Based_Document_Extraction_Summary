@@ -124,15 +124,14 @@ class Bert(nn.Module):
 
     def forward(self, x, segs, mask):
         if(self.finetune):
-            top_vec, _ = self.model(x, token_type_ids=segs, attention_mask=mask)
-            #print(last_hiddens, last_pooling_hiddens, hiddens)
+            output = self.model(x, token_type_ids=segs, attention_mask=mask)
+            # print(last_hiddens, last_pooling_hiddens, hiddens)
             #top_vec = hiddens[-1]
         else:
             self.eval()
             with torch.no_grad():
-                top_vec, _ = self.model(x, token_type_ids=segs, attention_mask=mask)
-        return top_vec
-
+                output = self.model(x, token_type_ids=segs, attention_mask=mask)
+        return output["last_hidden_state"]
 
 class ExtSummarizer(nn.Module):
     def __init__(self, args, device, checkpoint):
@@ -174,6 +173,7 @@ class ExtSummarizer(nn.Module):
         sents_vec = top_vec[torch.arange(top_vec.size(0)).unsqueeze(1), clss]
         sents_vec = sents_vec * mask_cls[:, :, None].float()
         sent_scores = self.ext_layer(sents_vec, mask_cls).squeeze(-1)
+
         return sent_scores, mask_cls
 
 

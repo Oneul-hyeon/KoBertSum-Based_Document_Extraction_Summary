@@ -9,7 +9,6 @@ from models.reporter_ext import ReportMgr, Statistics
 from others.logging import logger
 from others.utils import test_rouge, rouge_results_to_str
 
-
 def _tally_parameters(model):
     n_params = sum([p.nelement() for p in model.parameters()])
     return n_params
@@ -226,88 +225,82 @@ class Trainer(object):
         if (not cal_lead and not cal_oracle):
             self.model.eval()
         stats = Statistics()
-
         can_path = '%s_step_%d.candidate' % (self.args.result_path, step)
-        gold_path = '%s_step_%d.gold' % (self.args.result_path, step)
         with open(can_path, 'w') as save_pred:
-            with open(gold_path, 'w') as save_gold:
-                with torch.no_grad():
-                    for batch in test_iter:
-                        src = batch.src
-                        labels = batch.src_sent_labels
-                        segs = batch.segs
-                        clss = batch.clss
-                        mask = batch.mask_src
-                        mask_cls = batch.mask_cls
+            with torch.no_grad():
+                for batch in test_iter:
+                    src = batch.src
+                    labels = batch.src_sent_labels
+                    segs = batch.segs
+                    clss = batch.clss
+                    mask = batch.mask_src
+                    mask_cls = batch.mask_cls
 
-                        gold = []
-                        pred = []
-                        pred_idx = []
+                    pred = []
+                    pred_idx = []
 
-                        if (cal_lead):
-                            selected_ids = [list(range(batch.clss.size(1)))] * batch.batch_size
-                        elif (cal_oracle):
-                            selected_ids = [[j for j in range(batch.clss.size(1)) if labels[i][j] == 1] for i in
-                                            range(batch.batch_size)]
-                        else:
-                            sent_scores, mask = self.model(src, segs, clss, mask, mask_cls)
+                    if (cal_lead):
+                        selected_ids = [list(range(batch.clss.size(1)))] * batch.batch_size
+                    elif (cal_oracle):
+                        selected_ids = [[j for j in range(batch.clss.size(1)) if labels[i][j] == 1] for i in
+                                        range(batch.batch_size)]
+                    else:
+                        sent_scores, mask = self.model(src, segs, clss, mask, mask_cls)
 
-                            loss = self.loss(sent_scores, labels.float())
-                            loss = (loss * mask.float()).sum()
-                            batch_stats = Statistics(float(loss.cpu().data.numpy()), len(labels))
-                            stats.update(batch_stats)
+                        loss = self.loss(sent_scores, labels.float())
+                        loss = (loss * mask.float()).sum()
+                        batch_stats = Statistics(float(loss.cpu().data.numpy()), len(labels))
+                        stats.update(batch_stats)
 
-                            sent_scores = sent_scores + mask.float()
-                            sent_scores = sent_scores.cpu().data.numpy()
-                            # print(sent_scores)
-                            selected_ids = np.argsort(-sent_scores, 1)
-                            # print(selected_ids)
-                        # selected_ids = np.sort(selected_ids,1)
-                        for i, idx in enumerate(selected_ids):
-                            _pred = []
-                            _pred_idx = []
-                            if (len(batch.src_str[i]) == 0):
+                        sent_scores = sent_scores + mask.float()
+                        sent_scores = sent_scores.cpu().data.numpy()
+                        # print(sent_scores)
+                        selected_ids = np.argsort(-sent_scores, 1)
+                        # print(selected_ids)
+                    # selected_ids = np.sort(selected_ids,1)
+                    for i, idx in enumerate(selected_ids):
+                        _pred = []
+                        _pred_idx = []
+                        if (len(batch.src_str[i]) == 0):
+                            continue
+                        for j in selected_ids[i][:len(batch.src_str[i])]:
+                            if (j >= len(batch.src_str[i])):
                                 continue
-                            for j in selected_ids[i][:len(batch.src_str[i])]:
-                                if (j >= len(batch.src_str[i])):
-                                    continue
-                                candidate = batch.src_str[i][j].strip()
-                                if (self.args.block_trigram):
-                                    if (not _block_tri(candidate, _pred)):
-                                        _pred.append(candidate)
-                                        _pred_idx.append(j)
-                                else:
+                            candidate = batch.src_str[i][j].strip()
+                            if (self.args.block_trigram):
+                                if (not _block_tri(candidate, _pred)):
                                     _pred.append(candidate)
                                     _pred_idx.append(j)
+                            else:
+                                _pred.append(candidate)
+                                _pred_idx.append(j)
 
-                                if ((not cal_oracle) and (not self.args.recall_eval) and len(_pred) == 3):
-                                    break
-                            
-                            if len(_pred) < 3:
-                                print(_pred)
-                                #print('selected_ids: ', selected_ids)
-                                print('batch.src_str[i]: ', batch.src_str[i])
-                                print('selected_ids[i]: ', selected_ids[i])
-                                _pred = np.array(batch.src_str[i])[selected_ids[i][:3]]
-                                print(_pred)
+                            if ((not cal_oracle) and (not self.args.recall_eval) and len(_pred) == 3):
+                                break
+                        
+                        if len(_pred) < 3:
+                            print(_pred)
+                            #print('selected_ids: ', selected_ids)
+                            print('batch.src_str[i]: ', batch.src_str[i])
+                            print('selected_ids[i]: ', selected_ids[i])
+                            _pred = np.array(batch.src_str[i])[selected_ids[i][:3]]
+                            print(_pred)
 
 
-                            _pred = '<q>'.join(_pred)
-                            if (self.args.recall_eval):
-                                _pred = ' '.join(_pred.split()[:len(batch.tgt_str[i].split())])
+                        _pred = '<q>'.join(_pred)
+                        if (self.args.recall_eval):
+                            _pred = ' '.join(_pred.split()[:len(batch.tgt_str[i].split())])
 
-                            pred.append(_pred)
-                            pred_idx.append(_pred_idx)
-                            gold.append(batch.tgt_str[i])
-                        #print(batch.tgt_str)
-                        # print(pred)
-                        for i in range(len(gold)):
-                            save_gold.write(gold[i].strip() + '\n')
-                        for i in range(len(pred)):
-                            save_pred.write(pred[i].strip() + str(pred_idx[i]) + '\n')
-        if (step != -1 and self.args.report_rouge):
-            rouges = test_rouge(self.args.temp_dir, can_path, gold_path)
-            logger.info('Rouges at step %d \n%s' % (step, rouge_results_to_str(rouges)))
+                        pred.append(_pred)
+                        pred_idx.append(_pred_idx)
+                    #print(batch.tgt_str)
+                    # print(pred)
+                    for i in range(len(pred)):
+                        sents = pred[i].split('<q>')
+                        for sent in sents :
+                            save_pred.write(sent + ' ')
+                    save_pred.write("\n")
+                        # save_pred.write(pred[i].strip() + str(pred_idx[i]) + '\n')
         self._report_step(0, step, valid_stats=stats)
 
         return stats

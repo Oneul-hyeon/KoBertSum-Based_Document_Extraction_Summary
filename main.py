@@ -2,7 +2,7 @@ import os
 import sys
 import time
 import argparse
-#from src.others.test_rouge_score import RougeScorer
+# from src.others.test_rouge_score import RougeScorer
 
 PROBLEM = 'ext'
 
@@ -31,10 +31,10 @@ if __name__ == '__main__':
     parser.add_argument("-train_from", default=None, type=str)
     parser.add_argument("-model_path", default=None, type=str)
     parser.add_argument("-test_from", default=None, type=str)
+    parser.add_argument("--make_gold", default="false", type=str)
     args = parser.parse_args()
 
-    # now = time.strftime('%m%d_%H%M')
-    now = "1209_1236"
+    now = "KoBertSum"
 
     # python main.py -task install
     if args.task == 'install':
@@ -121,14 +121,14 @@ if __name__ == '__main__':
             -sep_optim true -use_interval true -visible_gpus {args.visible_gpus} \
             -max_pos 512 -max_length 200 -alpha 0.95 -min_length 50 \
             -report_rouge False \
-            -max_tgt_len 100
+            -max_tgt_len 100 -make_gold {args.make_gold}
         """)
         # -max_pos 512 -max_length 200 -alpha 0.95 -min_length 50 \
         # -report_rouge True  \
         #  -model_path {MODEL_DIR} 
         # args.max_tgt_len=140  이거 수정해도 효과가 거의 없음
 
-        os.system(f"python make_submission.py result_{model_folder}_{model_name}.candidate")
+        # os.system(f"python make_submission.py result_{model_folder}_{model_name}.candidate")
 
     elif args.task == 'rouge':
         pass

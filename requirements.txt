@@ -1,6 +1,12 @@
+kss
+bs4
+pandas
+nltk
+konlpy
 multiprocess==0.70.9
-numpy==1.17.2
+numpy==1.24.4
 pyrouge==0.1.3
-transformers==3.*  #pytorch-transformers==1.2.0
+transformers==4.38.2
 tensorboardX==1.9
-torch==1.1.0
+torch==2.0.1
+protobuf==3.20.0
