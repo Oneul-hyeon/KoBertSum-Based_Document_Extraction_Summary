@@ -55,10 +55,10 @@ BertSum은 BERT 위에 inter-sentence Transformer 2-layers 를 얹은 구조를 
    Dataset 폴더의 구조는 아래와 같이 될 것입니다.
 
     > Dataset
-    >   Training
-    >     - 법률_train_original
-    >     - 사설_train_original
-    >     - 신문기사_train_original
+        > Training
+            > - 법률_train_original
+            > - 사설_train_original
+            > - 신문기사_train_original
 
     >   Validation
     >     - 법률_valid_original
