@@ -71,7 +71,7 @@ BertSum은 BERT 위에 inter-sentence Transformer 2-layers 를 얹은 구조를 
     python Datamaking.py
     ```
 
-   실행 결과로서 `ext/data/raw` 에 'train.jasonl' 파일과 'test.jasonl' 파일이 생성됩니다.
+   실행 결과로서 `ext/data/raw` 에 `train.jasonl` 파일과 `test.jasonl` 파일이 생성됩니다.
 
    다음으로 아래 코드를 실행하여 BERT 입력을 위한 형태로 변환합니다.
 
@@ -83,7 +83,7 @@ BertSum은 BERT 위에 inter-sentence Transformer 2-layers 를 얹은 구조를 
    
    결과는 `ext/data/bert_data/train_abs` 및  `ext/data/bert_data/valid_abs` 에 저장됩니다.
    
-1. Fine-tuning
+2. Fine-tuning
 
     KoBERT 모델을 기반으로 fine-tuning을 진행하고, 1,000 step마다  Fine-tuned model 파일(`.pt`)을 저장합니다. 
 
@@ -109,7 +109,7 @@ BertSum은 BERT 위에 inter-sentence Transformer 2-layers 를 얹은 구조를 
 
    결과는 `ext/logs` 폴더 내 `valid_1209_1236.log` 형태로 저장됩니다.
 
-3. Inference & make submission file
+3. Inference
 
     Validation을 통해 확인한 가장 성능이 우수한 model파일을 통해 실제로 텍스트 요약 과업을 수행합니다.
 
