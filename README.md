@@ -1,9 +1,15 @@
-
-
 # KoBertSum
+## Before starting
 
-## 모델 소개
+Note that this code is https://github.com/uoneway/KoBertSum.git
 
+The existing code had a torch version of 1.1.0, so it was not easy to try with the current version.
+
+Accordingly, we modified it to use torch version 2.0.1 of BertSum.
+
+In addition, we inform you that this is a modified version of KoBertSum as the [Bflysoft-뉴스기사 데이터셋](https://dacon.io/competitions/official/235671/data/) data provided in Dacon's Korean document extraction and summary AI competition, which was previously used, was transferred to [문서요약 텍스트](https://www.aihub.or.kr/aihubdata/data/view.do?currMenu=&topMenu=&aihubDataSe=data&dataSetSn=97) of AI-Hub.
+
+## Introduce Model
 ### KoBertSum이란?
 
 KoBERTSUM은 ext 및 abs summarizatoin 분야에서 우수한 성능을 보여주고 있는 [BertSum모델](https://github.com/nlpyang/PreSumm)을 한국어 데이터에 적용할 수 있도록 수정한 한국어 요약 모델입니다.
@@ -12,19 +18,9 @@ KoBERTSUM은 ext 및 abs summarizatoin 분야에서 우수한 성능을 보여�
 
 - Pre-trained BERT로 [KoBERT](https://github.com/SKTBrain/KoBERT)를 이용합니다. 원활한 연결을 위해 [Transformers(](https://github.com/monologg/KoBERT-Transformers)[monologg](https://github.com/monologg/KoBERT-Transformers)[)](https://github.com/monologg/KoBERT-Transformers)를 통해 Huggingface transformers 라이브러리를 사용합니다.
 
-- 이용 Data로 한국어 문서 추출요약 AI 경진대회(~ 2020.12.09)에서 사용된 [Bflysoft-뉴스기사 데이터셋](https://dacon.io/competitions/official/235671/data/)에 맞춰져 있습니다.
+- 이용 Data로 AI-Hub의 [문서요약 텍스트](https://www.aihub.or.kr/aihubdata/data/view.do?currMenu=&topMenu=&aihubDataSe=data&dataSetSn=97)를 사용했다.
 
 - `BertSumExt`모델만 지원합니다.
-
-  
-
-업데이트 계획은 다음과 같습니다.
-
-- [ ] 다양한 데이터를 받아들일 수 있도록 수정
-- [ ] `BertSumAbs` 및 `BertSumExtAbs` 요약모델 추가 지원
-- [ ] Pre-trained BERT로 [KoBERT ](https://github.com/SKTBrain/KoBERT)외 타 모델 지원(Huggingface transformers 라이브러리 지원 모델 위주)
-
-
 
 ### BertSum이란?
 
@@ -47,12 +43,33 @@ BertSum은 BERT 위에 inter-sentence Transformer 2-layers 를 얹은 구조를 
 1. 필요 라이브러리 설치
 
     ```
-    python main.py -task install
+    pip install -r requirements.txt
     ```
 
 ## Usage
 
 1. 데이터 Preprocessing
+
+   데이터를 Dataset 폴더에 넣습니다.
+   
+   Dataset 폴더의 구조는 아래와 같이 될 것입니다.
+
+   - ### Dataset
+    > Training
+    > - 법률_train_original
+    > - 사설_train_original
+    > - 신문기사_train_original
+    > Validation
+    > - 법률_valid_original
+    > - 사설_valid_original
+    > - 신문기사_valid_original
+    
+    ```
+    python Datamaking.py
+    ```
+
+    
+
 
    데이터를 `ext/data/raw` 에 넣어준 후 다음을 실행하여 BERT 입력을 위한 형태로 변환합니다.
 
