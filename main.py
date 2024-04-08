@@ -7,7 +7,6 @@ import argparse
 PROBLEM = 'ext'
 
 ## 사용할 path 정의
-# PROJECT_DIR = '/home/uoneway/Project/PreSumm_ko'
 PROJECT_DIR = os.getcwd()
 print(PROJECT_DIR)
 
@@ -34,15 +33,13 @@ if __name__ == '__main__':
     parser.add_argument("--make_gold", default="false", type=str)
     args = parser.parse_args()
 
-    now = "KoBertSum"
+    now = "Oneul_KoBERT"
 
     # python main.py -task install
     if args.task == 'install':
         os.chdir(PROJECT_DIR)
         os.system("pip install -r requirements.txt")
         os.system("pip install Cython")
-        os.system("python src/others/install_mecab.py")
-        os.system("pip install -r requirements_prepro.txt")
 
     # python main.py -task make_data -n_cpus 2
     elif args.task == 'make_data':
@@ -126,9 +123,6 @@ if __name__ == '__main__':
         # -max_pos 512 -max_length 200 -alpha 0.95 -min_length 50 \
         # -report_rouge True  \
         #  -model_path {MODEL_DIR} 
-        # args.max_tgt_len=140  이거 수정해도 효과가 거의 없음
-
-        # os.system(f"python make_submission.py result_{model_folder}_{model_name}.candidate")
 
     elif args.task == 'rouge':
         pass
