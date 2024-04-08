@@ -14,9 +14,8 @@ import torch
 from multiprocess import Pool
 
 from others.logging import logger
-# from others.tokenization import BertTokenizer
-from prepro.tokenization_kobert import KoBertTokenizer
 from transformers import XLNetTokenizer
+from transformers import BertTokenizer, BertModel
 
 from others.utils import clean
 from prepro.utils import _get_word_ngrams
@@ -276,7 +275,7 @@ def full_selection(doc_sent_list, abstract_sent_list, summary_size=3):
         sents_merged = ' '.join(sents_array)
         #print(sents_merged)
         # print(sents_idx)
-        # print(sents_array)
+        # print(sents_array) 
 
         # ROUGE1,2,l 합score 계산
         rouge_scores = rouge_evaluator.get_scores(sents_merged, abstract)
@@ -299,20 +298,22 @@ def hashhex(s):
 
 class BertData():
     used_subtoken_idxs = set()
-
     def __init__(self, args):
         self.args = args
-        self.tokenizer = KoBertTokenizer.from_pretrained("monologg/kobert", do_lower_case=True)
-
+        # self.tokenizer = KoBertTokenizer.from_pretrained("monologg/kobert", do_lower_case=True)
+        self.tokenizer = BertTokenizer.from_pretrained("monologg/kobert")
         self.sep_token = '[SEP]'
         self.cls_token = '[CLS]'
         self.pad_token = '[PAD]'
         self.tgt_bos = '¶' # '[unused0]'   204; 314[ 315]
         self.tgt_eos = '----------------' # '[unused1]'
         self.tgt_sent_split = ';' #'[unused2]'
-        self.sep_vid = self.tokenizer.token2idx[self.sep_token]
-        self.cls_vid = self.tokenizer.token2idx[self.cls_token]
-        self.pad_vid = self.tokenizer.token2idx[self.pad_token]
+        # self.sep_vid = self.tokenizer.token2idx[self.sep_token]
+        # self.cls_vid = self.tokenizer.token2idx[self.cls_token]
+        # self.pad_vid = self.tokenizer.token2idx[self.pad_token]
+        self.sep_vid = self.tokenizer.convert_tokens_to_ids(self.sep_token)
+        self.cls_vid = self.tokenizer.convert_tokens_to_ids(self.cls_token)
+        self.pad_vid = self.tokenizer.convert_tokens_to_ids(self.pad_token)
 
     def preprocess(self, src, tgt, sent_labels, use_bert_basic_tokenizer=False, is_test=False):
 

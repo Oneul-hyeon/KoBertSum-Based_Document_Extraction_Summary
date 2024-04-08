@@ -57,7 +57,7 @@ def preprocessing(text, tokenizer=None):
         text = ' '.join(text)
 
     return text
-
+# 문장 분리
 def korean_sent_spliter(doc):
     sents_splited = kss.split_sentences(doc)
     if len(sents_splited) == 1:
@@ -72,7 +72,6 @@ def korean_sent_spliter(doc):
                 del sents_splited[idx + 1]
                 idx -= 1
         return sents_splited
-
 
 def create_json_files(df, data_type='train', target_summary_sent=None, path=''):
     NUM_DOCS_IN_ONE_FILE = 1000
@@ -113,8 +112,6 @@ def create_json_files(df, data_type='train', target_summary_sent=None, path=''):
         with open(file_name, 'w') as json_file:
             json_file.write(json_string)
 
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-task", default=None, type=str, choices=['df', 'train_bert', 'test_bert'])
@@ -149,7 +146,7 @@ if __name__ == '__main__':
         df['extractive_sents'] = df.apply(lambda row: list(np.array(row['article_original'])[row['extractive']]) , axis=1)
 
         # random split
-        train_df = df.sample(frac=0.95,random_state=42) #random state is a seed value
+        train_df = df.sample(frac=0.9,random_state=42) #random state is a seed value
         valid_df = df.drop(train_df.index)
         train_df.reset_index(inplace=True, drop=True)
         valid_df.reset_index(inplace=True, drop=True)
@@ -215,9 +212,7 @@ if __name__ == '__main__':
             os.system(f"rm {json_data_dir}/*")
         else:
             os.mkdir(json_data_dir)
-
         create_json_files(test_df, data_type='test', path=JSON_DATA_DIR)
-        
         ## Convert json to bert.pt files
         bert_data_dir = f"{BERT_DATA_DIR}/test"
         if os.path.exists(bert_data_dir):

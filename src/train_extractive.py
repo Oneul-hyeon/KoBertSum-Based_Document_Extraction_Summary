@@ -110,17 +110,17 @@ def validate_ext(args, device_id):
         cp_files.sort(key=os.path.getmtime)
         xent_lst = []
         for i, cp in enumerate(cp_files):
-            step = int(cp.split('.')[-2].split('_')[-1])
+            step = int(cp.split('.')[0].split('_')[-1])
             xent = validate(args, device_id, cp, step)
             xent_lst.append((xent, cp))
             max_step = xent_lst.index(min(xent_lst))
             if (i - max_step > 10):
                 break
-        xent_lst = sorted(xent_lst, key=lambda x: x[0])[:3]
+        xent_lst = sorted(xent_lst, key=lambda x: x[0])[:3] # loss가 가장 작은 모델 3개 정렬
         logger.info('PPL %s' % str(xent_lst))
-        for xent, cp in xent_lst:
-            step = int(cp.split('.')[-2].split('_')[-1])
-            test_ext(args, device_id, cp, step)
+        # for xent, cp in xent_lst:
+        #     step = int(cp.split('.')[0].split('_')[-1])
+        #     test_ext(args, device_id, cp, step)
     else:
         while (True):
             cp_files = sorted(glob.glob(os.path.join(args.model_path, 'model_step_*.pt')))
@@ -173,7 +173,7 @@ def validate(args, device_id, pt, step):
     return stats.xent()
 
 
-def test_ext(args, device_id, pt, step):
+def test_ext(args, device_id, pt, step): # pt : 모델명, step : 가장 성능이 좋았던 모델 step number
     device = "cpu" if args.visible_gpus == '-1' else "cuda"
     if (pt != ''):
         test_from = pt
@@ -235,7 +235,13 @@ def train_single_ext(args, device_id):
     def train_iter_fct():
         return data_loader.Dataloader(args, load_dataset(args, 'train', shuffle=True), args.batch_size, device,
                                       shuffle=True, is_test=False)
-
+    ###
+    # file_name = './train_dataset.txt'
+    # with open(file_name, 'w+') as file:
+        # file.write('\n'.join(list(load_dataset(args, 'train', shuffle=True))))  # '\n' 대신 ', '를 사용하면 줄바꿈이 아닌 ', '를 기준으로 
+    ###
+    
+    print(f"wanted data : {list(load_dataset(args, 'train', shuffle=True))[0]}")
     model = ExtSummarizer(args, device, checkpoint)
     optim = model_builder.build_optim(args, model, checkpoint)
 

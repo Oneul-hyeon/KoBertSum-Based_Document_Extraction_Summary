@@ -32,13 +32,11 @@ class Batch(object):
             segs = torch.tensor(self._pad(pre_segs, 0))
             mask_src = ~(src == 0)
             mask_tgt = ~(tgt == 0)
-            # mask_src = 1 - (src == 0)
-            # mask_tgt = 1 - (tgt == 0)
 
 
             clss = torch.tensor(self._pad(pre_clss, -1))
             src_sent_labels = torch.tensor(self._pad(pre_src_sent_labels, 0))
-            # mask_cls = 1 - (clss == -1)
+
             mask_cls = ~(clss == -1)
             clss[clss == -1] = 0
             setattr(self, 'clss', clss.to(device))
@@ -188,11 +186,6 @@ class DataIterator(object):
             random.shuffle(self.dataset)
         xs = self.dataset
         return xs
-
-
-
-
-
 
     def preprocess(self, ex, is_test):
         src = ex['src']

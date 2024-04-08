@@ -1,9 +1,8 @@
 import os
 import sys
 
-
-# PROJECT_DIR = '/home/uoneway/Project/PreSumm_ko'
-PROJECT_DIR = '../..'
+# temp 폴더에 Mecab 설치를 위한 프로그램 다운로드
+PROJECT_DIR = os.getcwd()
 
 os.chdir(PROJECT_DIR)
 os.makedirs('temp', exist_ok=True)
@@ -70,6 +69,5 @@ git clone https://bitbucket.org/eunjeon/mecab-python-0.996.git
 cd mecab-python-0.996
 python3 setup.py build
 python3 setup.py install
+python install mecab-python
 """)
-
-# pip install mecab-python3

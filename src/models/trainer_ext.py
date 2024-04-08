@@ -3,8 +3,9 @@ import os
 import numpy as np
 import torch
 from tensorboardX import SummaryWriter
-
+import json
 import distributed
+import pandas as pd
 from models.reporter_ext import ReportMgr, Statistics
 from others.logging import logger
 from others.utils import test_rouge, rouge_results_to_str
@@ -221,6 +222,23 @@ class Trainer(object):
                 if len(tri_c.intersection(tri_s)) > 0:
                     return True
             return False
+        
+        def make_df(result_text, result_pred_idx, result_pred) :
+            result_label_idx = []
+            result_label = []
+            test_file_path = f"../ext/data/raw/test.jsonl"
+            with open(test_file_path, "r") as file:
+                    for jsline in file:
+                        data = json.loads(jsline)
+                        result_label_idx.append(data['extractive'])
+                        result_label.append(' '.join(np.array(data['article_original'])[data['extractive']]))
+            result_df = pd.DataFrame({"original text" : result_text,
+                                    "extractive" : result_label_idx,
+                                    "extractive_sents" : result_label,
+                                    "pred_idx" : result_pred_idx,
+                                    "pred" : result_pred
+                                    })
+            result_df.to_csv("../result_df.csv", index = False)
 
         if (not cal_lead and not cal_oracle):
             self.model.eval()
@@ -228,6 +246,9 @@ class Trainer(object):
         can_path = '%s_step_%d.candidate' % (self.args.result_path, step)
         with open(can_path, 'w') as save_pred:
             with torch.no_grad():
+                result_text = []
+                result_pred_idx = []
+                result_pred = []
                 for batch in test_iter:
                     src = batch.src
                     labels = batch.src_sent_labels
@@ -235,7 +256,6 @@ class Trainer(object):
                     clss = batch.clss
                     mask = batch.mask_src
                     mask_cls = batch.mask_cls
-
                     pred = []
                     pred_idx = []
 
@@ -279,31 +299,38 @@ class Trainer(object):
                                 break
                         
                         if len(_pred) < 3:
-                            print(_pred)
+                            # print(_pred)
                             #print('selected_ids: ', selected_ids)
                             print('batch.src_str[i]: ', batch.src_str[i])
+                            # print('label_idx :', segs[i])
+                            # print('label', src_txt[i])
                             print('selected_ids[i]: ', selected_ids[i])
                             _pred = np.array(batch.src_str[i])[selected_ids[i][:3]]
-                            print(_pred)
 
-
+                        # result_df.loc[result_idx] = [batch.src_str[i], selected_ids[i], ' '.join(_pred)]
+                        # result_idx += 1
+                        result_text.append(batch.src_str[i])
+                        result_pred_idx.append(selected_ids[i][:3])
+                        result_pred.append(' '.join(_pred))
                         _pred = '<q>'.join(_pred)
                         if (self.args.recall_eval):
                             _pred = ' '.join(_pred.split()[:len(batch.tgt_str[i].split())])
-
                         pred.append(_pred)
                         pred_idx.append(_pred_idx)
                     #print(batch.tgt_str)
                     # print(pred)
+
+                    # result_df.loc[result_idx] = [batch.src_str[i], ]
                     for i in range(len(pred)):
                         sents = pred[i].split('<q>')
                         for sent in sents :
                             save_pred.write(sent + ' ')
                     save_pred.write("\n")
                         # save_pred.write(pred[i].strip() + str(pred_idx[i]) + '\n')
+        make_df(result_text, result_pred_idx, result_pred)
         self._report_step(0, step, valid_stats=stats)
-
         return stats
+        
 
     def _gradient_accumulation(self, true_batchs, normalization, total_stats,
                                report_stats):

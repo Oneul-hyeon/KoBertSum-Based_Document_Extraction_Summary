@@ -110,54 +110,29 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.gpu_ranks = [int(i) for i in range(len(args.visible_gpus.split(',')))]
-    args.world_size = len(args.gpu_ranks)
+    args.world_size = len(args.gpu_ranks) # gpu 수
     os.environ["CUDA_VISIBLE_DEVICES"] = args.visible_gpus
 
     init_logger(args.log_file)
     device = "cpu" if args.visible_gpus == '-1' else "cuda"
     device_id = 0 if device == "cuda" else -1
 
-    # if (args.task == 'abs'):
-    #     if (args.mode == 'train'):
-    #         train_abs(args, device_id)
-    #     elif (args.mode == 'validate'):
-    #         validate_abs(args, device_id)
-    #     elif (args.mode == 'lead'):
-    #         baseline(args, cal_lead=True)
-    #     elif (args.mode == 'oracle'):
-    #         baseline(args, cal_oracle=True)
-    #     if (args.mode == 'test'):
-    #         cp = args.test_from
-    #         try:
-    #             step = int(cp.split('.')[-2].split('_')[-1])
-    #         except:
-    #             step = 0
-    #         test_abs(args, device_id, cp, step)
-    #     elif (args.mode == 'test_text'):
-    #         cp = args.test_from
-    #         try:
-    #             step = int(cp.split('.')[-2].split('_')[-1])
-    #         except:
-    #             step = 0
-    #             test_text_abs(args, device_id, cp, step)
-
-    # elif (args.task == 'ext'):
     if (args.task == 'ext'):
         if (args.mode == 'train'):
             train_ext(args, device_id)
         elif (args.mode == 'validate'):
             validate_ext(args, device_id)
-        if (args.mode == 'test'):
+        elif (args.mode == 'test'):
             cp = args.test_from
             try:
-                step = int(cp.split('.')[-2].split('_')[-1])
+                step = int(cp.split('.')[0].split('_')[-1])
             except:
                 step = 0
             test_ext(args, device_id, cp, step)
-        elif (args.mode == 'test_text'):
-            cp = args.test_from
-            try:
-                step = int(cp.split('.')[-2].split('_')[-1])
-            except:
-                step = 0
-                test_text_abs(args, device_id, cp, step)
+        # elif (args.mode == 'test_text'):
+        #     cp = args.test_from
+        #     try:
+        #         step = int(cp.split('.')[-2].split('_')[-1])
+        #     except:
+        #         step = 0
+        #         test_text_abs(args, device_id, cp, step)
