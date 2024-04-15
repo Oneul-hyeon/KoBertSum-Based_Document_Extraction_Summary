@@ -1,7 +1,7 @@
 # Korean-BertSum
 ## Before starting
 
-이 코드는 https://github.com/uoneway/KoBertSum.git에서 fork 했음을 알려드립니다.
+이 코드는 https://github.com/uoneway/KoBertSum.git 에서 fork 했음을 알려드립니다.
 
 기존의 코드는 torch 버전 1.1.0에서 수행되었습니다.
 
