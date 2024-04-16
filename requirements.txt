@@ -10,6 +10,6 @@ transformers==4.38.2
 tensorboardX==1.9
 torch==2.0.1
 protobuf==3.20.0
-python-mecab
-rouge-score
+mecab-python
+korouge-score
 gradio
