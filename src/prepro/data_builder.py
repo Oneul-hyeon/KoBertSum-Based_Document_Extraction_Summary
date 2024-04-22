@@ -15,7 +15,7 @@ from multiprocess import Pool
 
 from others.logging import logger
 from transformers import XLNetTokenizer
-from transformers import BertTokenizer, BertModel
+from transformers import BertTokenizer, BertModel, AutoModel, AutoTokenizer
 
 from others.utils import clean
 from prepro.utils import _get_word_ngrams
@@ -29,12 +29,9 @@ from others.rouge_metric import Rouge
 
 nyt_remove_words = ["photo", "graph", "chart", "map", "table", "drawing"]
 
-
 def recover_from_corenlp(s):
     s = re.sub(r' \'{\w}', '\'\g<1>', s)
     s = re.sub(r'\'\' {\w}', '\'\'\g<1>', s)
-
-
 
 def load_json(p, lower):
     source = []
@@ -228,15 +225,11 @@ def full_selection(doc_sent_list, abstract_sent_list, summary_size=3):
 
     # 일단 greedy로 구한 다음 3개가 안되는 경우만 나머지를 full로 채움!
     selected_idx3_list = greedy_selection(doc_sent_list, abstract_sent_list, summary_size)
-    # print('1 ', selected_idx3_list)
-    # if len(selected_idx3_list) == 3:
-    #     return selected_idx3_list
 
     total_max_rouge_score = 0.0
     if src_len > 10 or (src_len <= 10 and len(selected_idx3_list) < 2): # greedy
         for i in range(summary_size - len(selected_idx3_list)):
 
-            #cur_sents_idx3_list = []
             cur_max_total_rouge_score = 0.0
             cur_sent_idx = -1
             for sent_idx, sent in enumerate(doc_sent_list_merged):
@@ -301,16 +294,14 @@ class BertData():
     def __init__(self, args):
         self.args = args
         # self.tokenizer = KoBertTokenizer.from_pretrained("monologg/kobert", do_lower_case=True)
-        self.tokenizer = BertTokenizer.from_pretrained("monologg/kobert")
+        self.tokenizer = AutoTokenizer.from_pretrained("monologg/kobigbird-bert-base") if args.model == "KoBigBird" else BertTokenizer.from_pretrained("monologg/kobert")
         self.sep_token = '[SEP]'
         self.cls_token = '[CLS]'
         self.pad_token = '[PAD]'
         self.tgt_bos = '¶' # '[unused0]'   204; 314[ 315]
         self.tgt_eos = '----------------' # '[unused1]'
         self.tgt_sent_split = ';' #'[unused2]'
-        # self.sep_vid = self.tokenizer.token2idx[self.sep_token]
-        # self.cls_vid = self.tokenizer.token2idx[self.cls_token]
-        # self.pad_vid = self.tokenizer.token2idx[self.pad_token]
+
         self.sep_vid = self.tokenizer.convert_tokens_to_ids(self.sep_token)
         self.cls_vid = self.tokenizer.convert_tokens_to_ids(self.cls_token)
         self.pad_vid = self.tokenizer.convert_tokens_to_ids(self.pad_token)
@@ -327,12 +318,10 @@ class BertData():
         _sent_labels = [0] * len(src)
         for l in sent_labels:
             _sent_labels[l] = 1
-        # print(sent_labels)
-        # print(_sent_labels)
+
         src = [src[i][:self.args.max_src_ntokens_per_sent] for i in idxs]
         sent_labels = [_sent_labels[i] for i in idxs]
-        # print(idxs)
-        # print(sent_labels)
+
         src = src[:self.args.max_src_nsents]
         sent_labels = sent_labels[:self.args.max_src_nsents]
 
@@ -357,15 +346,9 @@ class BertData():
         cls_ids = [i for i, t in enumerate(src_subtoken_idxs) if t == self.cls_vid]
         sent_labels = sent_labels[:len(cls_ids)]
 
-        # kobert transforemrs에 연결되어 있는 transforemrs tokenizer 사용
         tgt_subtokens_str = self.tgt_bos + ' '  \
             + f' {self.tgt_sent_split} '.join([' '.join(self.tokenizer.tokenize(' '.join(tt))) for tt in tgt]) \
             + ' ' + self.tgt_eos
-        ## presumm tokenizer 사용
-        # """Runs basic tokenization (punctuation splitting, lower casing, etc.)."""
-        # tgt_subtokens_str = '[unused0] ' + ' [unused2] '.join(
-        #     [' '.join(self.tokenizer.tokenize(' '.join(tt), use_bert_basic_tokenizer=use_bert_basic_tokenizer)) for tt in tgt]) + ' [unused1]'
-
 
         tgt_subtoken = tgt_subtokens_str.split()[:self.args.max_tgt_ntokens]
         if ((not is_test) and len(tgt_subtoken) < self.args.min_tgt_ntokens):
@@ -409,6 +392,7 @@ def _format_to_bert(params):
         return
 
     bert = BertData(args)
+    print(f'Now Tokenizer : {args.model} Tokenizer')
     logger.info('Processing %s' % json_file)
     jobs = json.load(open(json_file))
     datasets = []

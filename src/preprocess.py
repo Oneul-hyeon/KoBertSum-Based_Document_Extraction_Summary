@@ -18,8 +18,6 @@ def do_format_to_bert(args):
     data_builder.format_to_bert(args)
     print(time.clock())
 
-
-
 def do_format_xsum_to_lines(args):
     print(time.clock())
     data_builder.format_xsum_to_lines(args)
@@ -29,7 +27,6 @@ def do_tokenize(args):
     print(time.clock())
     data_builder.tokenize(args)
     print(time.clock())
-
 
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -66,7 +63,7 @@ if __name__ == '__main__':
     parser.add_argument('-dataset', default='')
 
     parser.add_argument('-n_cpus', default=2, type=int)
-
+    parser.add_argument("-model", default=None, type=str, choices=["KoBERT", "KoBigBird"])
 
     args = parser.parse_args()
     init_logger(args.log_file)

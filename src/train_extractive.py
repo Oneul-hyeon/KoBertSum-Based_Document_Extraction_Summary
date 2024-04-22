@@ -12,7 +12,6 @@ import signal
 import time
 
 import torch
-
 import distributed
 from models import data_loader, model_builder
 from models.data_loader import load_dataset
@@ -21,7 +20,6 @@ from models.trainer_ext import build_trainer
 from others.logging import logger, init_logger
 
 model_flags = ['hidden_size', 'ff_size', 'heads', 'inter_layers', 'encoder', 'ff_actv', 'use_interval', 'rnn_size']
-
 
 def train_multi_ext(args):
     """ Spawns 1 process per GPU """
@@ -135,7 +133,7 @@ def validate_ext(args, device_id):
                     timestep = time_of_cp
                     step = int(cp.split('.')[-2].split('_')[-1])
                     validate(args, device_id, cp, step)
-                    test_ext(args, device_id, cp, step)
+                    # test_ext(args, device_id, cp, step)
 
             cp_files = sorted(glob.glob(os.path.join(args.model_path, 'model_step_*.pt')))
             cp_files.sort(key=os.path.getmtime)
@@ -241,7 +239,7 @@ def train_single_ext(args, device_id):
         # file.write('\n'.join(list(load_dataset(args, 'train', shuffle=True))))  # '\n' 대신 ', '를 사용하면 줄바꿈이 아닌 ', '를 기준으로 
     ###
     
-    print(f"wanted data : {list(load_dataset(args, 'train', shuffle=True))[0]}")
+    # print(f"wanted data : {list(load_dataset(args, 'train', shuffle=True))[0]}")
     model = ExtSummarizer(args, device, checkpoint)
     optim = model_builder.build_optim(args, model, checkpoint)
 

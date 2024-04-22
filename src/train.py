@@ -21,10 +21,7 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-
-
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-task", default='ext', type=str, choices=['ext', 'abs'])
@@ -75,8 +72,6 @@ if __name__ == '__main__':
     parser.add_argument("-max_length", default=150, type=int)
     parser.add_argument("-max_tgt_len", default=140, type=int)
 
-
-
     parser.add_argument("-param_init", default=0, type=float)
     parser.add_argument("-param_init_glorot", type=str2bool, nargs='?',const=True,default=True)
     parser.add_argument("-optim", default='adam', type=str)
@@ -94,7 +89,6 @@ if __name__ == '__main__':
     parser.add_argument("-train_steps", default=1000, type=int)
     parser.add_argument("-recall_eval", type=str2bool, nargs='?',const=True,default=False)
 
-
     parser.add_argument('-visible_gpus', default='-1', type=str)
     parser.add_argument('-gpu_ranks', default='0', type=str)
     parser.add_argument('-log_file', default='../logs/cnndm.log')
@@ -107,8 +101,12 @@ if __name__ == '__main__':
     parser.add_argument("-train_from", default='')
     parser.add_argument("-report_rouge", type=str2bool, nargs='?',const=True,default=True)
     parser.add_argument("-block_trigram", type=str2bool, nargs='?', const=True, default=True)
+    parser.add_argument("-model", default=None, type=str, choices=["KoBERT", "KoBigBird"])
 
     args = parser.parse_args()
+    
+    print(f'now max_pos : {args.max_pos}')
+    
     args.gpu_ranks = [int(i) for i in range(len(args.visible_gpus.split(',')))]
     args.world_size = len(args.gpu_ranks) # gpu 수
     os.environ["CUDA_VISIBLE_DEVICES"] = args.visible_gpus
@@ -129,10 +127,3 @@ if __name__ == '__main__':
             except:
                 step = 0
             test_ext(args, device_id, cp, step)
-        # elif (args.mode == 'test_text'):
-        #     cp = args.test_from
-        #     try:
-        #         step = int(cp.split('.')[-2].split('_')[-1])
-        #     except:
-        #         step = 0
-        #         test_text_abs(args, device_id, cp, step)

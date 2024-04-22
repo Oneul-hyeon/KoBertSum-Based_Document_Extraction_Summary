@@ -10,18 +10,6 @@ from tqdm import tqdm
 import argparse
 import pickle
 
-PROBLEM = 'ext'
-
-## 사용할 path 정의
-PROJECT_DIR = '..'
-
-DATA_DIR = f'{PROJECT_DIR}/{PROBLEM}/data'
-RAW_DATA_DIR = DATA_DIR + '/raw'
-JSON_DATA_DIR = DATA_DIR + '/json_data'
-BERT_DATA_DIR = DATA_DIR + '/bert_data' 
-LOG_DIR = f'{PROJECT_DIR}/{PROBLEM}/logs'
-LOG_PREPO_FILE = LOG_DIR + '/preprocessing.log' 
-
 def number_split(sentence):
     # 1. 공백 이후 숫자로 시작하는 경우만(문자+숫자+문자, 문자+숫자 케이스는 제외), 해당 숫자와 그 뒤 문자를 분리
     num_str_pattern = re.compile(r'(\s\d+)([^\d\s])')
@@ -117,8 +105,20 @@ if __name__ == '__main__':
     parser.add_argument("-task", default=None, type=str, choices=['df', 'train_bert', 'test_bert'])
     parser.add_argument("-target_summary_sent", default='abs', type=str)
     parser.add_argument("-n_cpus", default='2', type=str)
-
+    parser.add_argument("-model", default=None, type=str, choices=["KoBERT", "KoBigBird"])
     args = parser.parse_args()
+
+    PROBLEM = 'ext'
+
+    ## 사용할 path 정의
+    PROJECT_DIR = '..'
+
+    DATA_DIR = f'{PROJECT_DIR}/{PROBLEM}/data'
+    RAW_DATA_DIR = DATA_DIR + '/raw'
+    JSON_DATA_DIR = f'{DATA_DIR}/json_data/{args.model}'
+    BERT_DATA_DIR = f'{DATA_DIR}/bert_data/{args.model}' 
+    LOG_DIR = f'{PROJECT_DIR}/{PROBLEM}/logs/{args.model}'
+    LOG_PREPO_FILE = f'{LOG_DIR}/preprocessing.log' 
 
     # python make_data.py -make df
     # Convert raw data to df
@@ -193,7 +193,8 @@ if __name__ == '__main__':
                 + f" -raw_path {json_data_dir}"
                 + f" -save_path {bert_data_dir}"
                 + f" -log_file {LOG_PREPO_FILE}"
-                + f" -lower -n_cpus {args.n_cpus}")
+                + f" -lower -n_cpus {args.n_cpus}"
+                + f" -model {args.model}")
 
 
     # python make_data.py -task test_bert
@@ -225,4 +226,5 @@ if __name__ == '__main__':
             + f" -raw_path {json_data_dir}"
             + f" -save_path {bert_data_dir}"
             + f" -log_file {LOG_PREPO_FILE}"
-            + f" -lower -n_cpus {args.n_cpus}")
+            + f" -lower -n_cpus {args.n_cpus}"
+            + f" -model {args.model}")
