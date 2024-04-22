@@ -48,7 +48,7 @@ Korean-BertSum은 ext 및 abs summarizatoin 분야에서 우수한 성능을 보
 
 업데이트 계획은 다음과 같습니다.
 
-- [ ] Pre-trained BERT로 [KoBERT ](https://github.com/SKTBrain/KoBERT)외 타 모델 지원(Huggingface transformers 라이브러리 지원 모델 위주)
+- [ ] 전체 문장의 요약 정보를 가질 수 있도록 수정 예정
 
 
 ## Environment Setting
@@ -57,7 +57,7 @@ Korean-BertSum은 ext 및 abs summarizatoin 분야에서 우수한 성능을 보
 
   ```
   GPU : GeForce RTX 3080
-  python : 3.9.19
+  python : 3.8.19
   CuDA : 11.6
   ```
 
